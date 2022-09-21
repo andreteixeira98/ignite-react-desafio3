@@ -19,7 +19,7 @@ interface ProductFormatted extends Product {
 
 interface CartItemsAmount {
   [key: number]: number;
-}
+}    
 
 const Home = (): JSX.Element => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -27,6 +27,9 @@ const Home = (): JSX.Element => {
 
   const cartItemsAmount = cart.reduce((sumAmount, product) => {
       let key = product.id;
+      if(!sumAmount[key]){
+        sumAmount[key] = product.amount;
+      }
       sumAmount[key] = product.amount;
       return sumAmount;
   }, {
