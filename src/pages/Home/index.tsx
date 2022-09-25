@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { MdAddShoppingCart } from 'react-icons/md';
 
-import { ProductList } from './styles';
+import { useCart } from '../../hooks/useCart';
 import { api } from '../../services/api';
 import { formatPrice } from '../../util/format';
-import { useCart } from '../../hooks/useCart';
+import { ProductList } from './styles';
 
 interface Product {
   id: number;
@@ -13,9 +13,9 @@ interface Product {
   image: string;
 }
 
-interface ProductFormatted extends Product {
-  priceFormatted: string;
-}
+// interface ProductFormatted extends Product {
+//   priceFormatted: string;
+// }
 
 interface CartItemsAmount {
   [key: number]: number;
@@ -25,21 +25,22 @@ const Home = (): JSX.Element => {
   const [products, setProducts] = useState<Product[]>([]);
   const { addProduct, cart } = useCart();
 
-  const cartItemsAmount = cart.reduce((sumAmount, product) => {
-      let key = product.id;
-      if(!sumAmount[key]){
-        sumAmount[key] = product.amount;
-      }
-      sumAmount[key] = product.amount;
-      return sumAmount;
+  const cartItemsAmount = products.reduce((sumAmount, productInHome) => {
+     
+    let prod = cart.find(productInCart => productInHome.id === productInCart.id 
+    );
+   
+    return {...sumAmount, [productInHome.id]:prod?.amount ?? 0 };
   }, {
-    
-  } as CartItemsAmount)
+   
+  } as CartItemsAmount);
 
   useEffect(() => {
     async function loadProducts() {
       const {data} = await api.get('/products');
+
       setProducts(data);
+
     }
 
     loadProducts();
@@ -56,7 +57,7 @@ const Home = (): JSX.Element => {
           <li key={product.id}>
             <img src={product.image} alt={product.title} />
             <strong>{product.title}</strong>
-            <span>R$ {product.price}</span>
+            <span>{formatPrice(product.price)}</span>
             <button
               type="button"
               data-testid="add-product-button"
@@ -64,9 +65,8 @@ const Home = (): JSX.Element => {
             >
               <div data-testid="cart-product-quantity">
                 <MdAddShoppingCart size={16} color="#FFF" />
-                {/* {cartItemsAmount[product.id] || 0} */} 2
+                {cartItemsAmount[product.id]}
               </div>
-
               <span>ADICIONAR AO CARRINHO</span>
             </button>
           </li>
